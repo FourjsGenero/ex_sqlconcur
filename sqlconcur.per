@@ -1,0 +1,30 @@
+layout
+grid
+{
+                                 Click to interrupt:   [b1           ]
+ <T t1                                                              >
+  Time         SQL statement                                SQLCODE
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ [ts          |msg                                         |sta     ]
+ <                                                                  >
+[info                                                                ]
+[                                                                    ]
+}
+end
+end
+attributes
+button b1: interrupt, text="Interrupt";
+edit ts  = formonly.ts;
+edit msg = formonly.msg;
+edit sta = formonly.sta;
+textedit info = formonly.info;
+end
+instructions
+screen record sr(formonly.ts, formonly.msg, formonly.sta);
+end
