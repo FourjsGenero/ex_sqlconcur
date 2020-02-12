@@ -14,7 +14,7 @@ MAIN
     DEFINE cnt BIGINT
     DEFINE rec RECORD
         k INT,
-        c CHAR(50)
+        c VARCHAR(50)
     END RECORD
 
     DEFER INTERRUPT
@@ -38,19 +38,15 @@ MAIN
         BEFORE DISPLAY
             CALL DIALOG.setArrayAttributes("sr",mlog_att)
 
-{
-        ON ACTION insert_100000
-            DROP TABLE ts1
-            CREATE TABLE ts1(pkey SERIAL, name VARCHAR(10))
-            INSERT INTO ts1 VALUES(100000, 'aaa')
-            CALL add_log("insert into ts1 ", sqlca.sqlcode, 0)
-}
-
         ON ACTION create_table
             DROP TABLE t1
             CREATE TABLE t1(k INT NOT NULL PRIMARY KEY, name VARCHAR(50))
-            --create table t1 ( k int, name varchar(50) )
-            CALL add_log("table t1 created", sqlca.sqlcode, 0)
+            --CREATE TABLE t1 ( k INT, name VARCHAR(50) )
+            CALL add_log("create table t1", sqlca.sqlcode, 0)
+
+        ON ACTION drop_table
+            DROP TABLE t1
+            CALL add_log("drop table t1", sqlca.sqlcode, 0)
 
         ON ACTION set_lock_wait
             LET int_flag = FALSE
@@ -79,13 +75,28 @@ MAIN
             CALL add_log("begin work", sqlca.sqlcode, NULL)
 
         ON ACTION insert_into
-            LET rec.k = rec.k + 1
+            LET rec.k = get_max_k() + 1
             LET rec.c = SFMT("item_%1", rec.k)
             INSERT INTO t1 VALUES(rec.*)
             CALL add_log(
                 SFMT("insert into t1 values (%1,'item_%1')", rec.k),
                 sqlca.sqlcode,
                 NULL)
+
+        ON ACTION insert_many
+            LET int_flag = FALSE
+            PROMPT "Number of rows to insert:" FOR cnt
+            CALL ui.Interface.refresh()
+            IF NOT int_flag THEN
+                LET rec.k = get_max_k()
+                FOR x=1 TO cnt
+                    LET rec.k = rec.k + 1
+                    LET rec.c = SFMT("item_%1", rec.k)
+                    INSERT INTO t1 VALUES(rec.*)
+                    IF int_flag THEN EXIT FOR END IF
+                END FOR
+                CALL add_log( SFMT("%1 rows inserted.", cnt), sqlca.sqlcode, NULL)
+            END IF
 
         ON ACTION select_for_update
             --ATTRIBUTES(COMMENT = "THIS IS INVALID (FGL-3585)!")
@@ -193,6 +204,8 @@ MAIN
 
     END DISPLAY
 
+    WHENEVER ERROR STOP
+
 END MAIN
 
 FUNCTION add_log(msg, sta, val)
@@ -215,4 +228,12 @@ FUNCTION add_log(msg, sta, val)
     END IF
     LET d = ui.Dialog.getCurrent()
     CALL d.setCurrentRow("sr", x)
+END FUNCTION
+
+FUNCTION get_max_k() RETURNS BIGINT
+    DEFINE m BIGINT
+    WHENEVER ERROR CONTINUE
+    SELECT MAX(k) INTO m FROM t1
+    WHENEVER ERROR STOP
+    RETURN NVL(m,0)
 END FUNCTION
