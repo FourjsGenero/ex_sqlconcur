@@ -20,8 +20,9 @@ MAIN
     DEFER INTERRUPT
     OPTIONS SQL INTERRUPT ON -- bad practice to set on here, just for testing!
 
-    DISPLAY "ADD YOUR DATABASE CONNECTION HERE..." EXIT PROGRAM 1
-    --DATABASE test1
+    --DISPLAY "ADD YOUR DATABASE CONNECTION HERE..." EXIT PROGRAM 1
+    DATABASE test1
+    --CONNECT TO "test1toro+driver='dbmora'" USER "orauser" USING "fourjs"
 
     --SET LOCK MODE TO WAIT 60
     --UPDATE pg_settings SET setting = 5000 WHERE name = 'lock_timeout'
