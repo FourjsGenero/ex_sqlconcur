@@ -10,7 +10,7 @@ all: $(PROGMOD) $(FORMS)
 	fglform -M $<
 
 %.42m: %.4gl
-	fglcomp -M $<
+	fglcomp -Wall -Wno-stdsql -M $<
 
 run:: all
 	fglrun sqlconcur.42m
