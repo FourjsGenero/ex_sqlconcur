@@ -203,6 +203,8 @@ MAIN
 
             CALL add_log("after long query", sqlca.sqlcode, NULL)
 
+        ON ACTION close EXIT DISPLAY
+
     END DISPLAY
 
     WHENEVER ERROR STOP
