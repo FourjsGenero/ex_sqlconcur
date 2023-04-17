@@ -40,14 +40,14 @@ MAIN
             CALL DIALOG.setArrayAttributes("sr",mlog_att)
 
         ON ACTION create_table
-            DROP TABLE t1
-            CREATE TABLE t1(k INT NOT NULL PRIMARY KEY, name VARCHAR(50))
-            --CREATE TABLE t1 ( k INT, name VARCHAR(50) )
-            CALL add_log("create table t1", sqlca.sqlcode, 0)
+            DROP TABLE fjs_tab1
+            CREATE TABLE fjs_tab1(k INT NOT NULL PRIMARY KEY, name VARCHAR(50))
+            --CREATE TABLE fjs_tab1 ( k INT, name VARCHAR(50) )
+            CALL add_log("create table fjs_tab1", sqlca.sqlcode, 0)
 
         ON ACTION drop_table
-            DROP TABLE t1
-            CALL add_log("drop table t1", sqlca.sqlcode, 0)
+            DROP TABLE fjs_tab1
+            CALL add_log("drop table fjs_tab1", sqlca.sqlcode, 0)
 
         ON ACTION set_lock_wait
             LET int_flag = FALSE
@@ -68,8 +68,8 @@ MAIN
             END CASE
 
         ON ACTION select_from
-            SELECT COUNT(*) INTO x FROM t1
-            CALL add_log("select count(*) from t1", sqlca.sqlcode, x)
+            SELECT COUNT(*) INTO x FROM fjs_tab1
+            CALL add_log("select count(*) from fjs_tab1", sqlca.sqlcode, x)
 
         ON ACTION begin_work
             BEGIN WORK
@@ -78,9 +78,9 @@ MAIN
         ON ACTION insert_into
             LET rec.k = get_max_k() + 1
             LET rec.c = SFMT("item_%1", rec.k)
-            INSERT INTO t1 VALUES(rec.*)
+            INSERT INTO fjs_tab1 VALUES(rec.*)
             CALL add_log(
-                SFMT("insert into t1 values (%1,'item_%1')", rec.k),
+                SFMT("insert into fjs_tab1 values (%1,'item_%1')", rec.k),
                 sqlca.sqlcode,
                 NULL)
 
@@ -93,7 +93,7 @@ MAIN
                 FOR x=1 TO cnt
                     LET rec.k = rec.k + 1
                     LET rec.c = SFMT("item_%1", rec.k)
-                    INSERT INTO t1 VALUES(rec.*)
+                    INSERT INTO fjs_tab1 VALUES(rec.*)
                     IF int_flag THEN EXIT FOR END IF
                 END FOR
                 CALL add_log( SFMT("%1 rows inserted.", cnt), sqlca.sqlcode, NULL)
@@ -106,9 +106,9 @@ MAIN
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
                 LET rec.c = CURRENT FRACTION TO FRACTION(3)
-                SELECT * FROM t1 WHERE k = rec.k FOR UPDATE
+                SELECT * FROM fjs_tab1 WHERE k = rec.k FOR UPDATE
                 CALL add_log(
-                    SFMT("select * from t1 for update ... where k=%1", rec.k),
+                    SFMT("select * from fjs_tab1 for update ... where k=%1", rec.k),
                     sqlca.sqlcode,
                     NULL)
             END IF
@@ -119,9 +119,9 @@ MAIN
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
                 LET rec.c = CURRENT FRACTION TO FRACTION(3)
-                UPDATE t1 SET name = rec.c WHERE k = rec.k
+                UPDATE fjs_tab1 SET name = rec.c WHERE k = rec.k
                 CALL add_log(
-                    SFMT("update t1 ... where k=%1", rec.k),
+                    SFMT("update fjs_tab1 ... where k=%1", rec.k),
                     sqlca.sqlcode,
                     NULL)
             END IF
@@ -131,8 +131,8 @@ MAIN
             PROMPT "Enter key of the row to update:" FOR rec.k
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
-                DELETE FROM t1 WHERE k = rec.k
-                CALL add_log("delete from t1 where k=1", sqlca.sqlcode, NULL)
+                DELETE FROM fjs_tab1 WHERE k = rec.k
+                CALL add_log("delete from fjs_tab1 where k=1", sqlca.sqlcode, NULL)
             END IF
 
         ON ACTION force_sql_error
@@ -152,8 +152,8 @@ MAIN
                 --  Why (k = ? or k = k + ?) ?
                 --     with 5 => where (k=5 or k=k+5) => only row 5
                 --     with 0 => where (k=0 or k=k+0) => all rows
-                FOR SELECT * FROM t1 WHERE (k = ? OR k = k + ?) FOR UPDATE
-                --FROM "SELECT * FROM t1 WHERE (k = ? OR k = k + ?) FOR UPDATE NOWAIT"
+                FOR SELECT * FROM fjs_tab1 WHERE (k = ? OR k = k + ?) FOR UPDATE
+                --FROM "SELECT * FROM fjs_tab1 WHERE (k = ? OR k = k + ?) FOR UPDATE NOWAIT"
 
             CALL add_log("declare for udpate cursor", sqlca.sqlcode, NULL)
         ON ACTION forupd_open -- must be in TX
@@ -173,8 +173,8 @@ MAIN
                 rec.k)
         ON ACTION forupd_update_wco
             LET rec.c = CURRENT FRACTION TO FRACTION(3)
-            UPDATE t1 SET name = rec.c WHERE CURRENT OF c_fu
-            CALL add_log("update t1 ... where current of", sqlca.sqlcode, NULL)
+            UPDATE fjs_tab1 SET name = rec.c WHERE CURRENT OF c_fu
+            CALL add_log("update fjs_tab1 ... where current of", sqlca.sqlcode, NULL)
         ON ACTION forupd_close
             CLOSE c_fu
             CALL add_log("close for udpate cursor", sqlca.sqlcode, NULL)
@@ -189,14 +189,14 @@ MAIN
 
 { MySQL
             SELECT DISTINCT benchmark(1000000000, md5('when will it end?'))
-                FROM t1
+                FROM fjs_tab1
 }
 
            select count(*) into cnt from
-                  t1 t1a01, t1 t1a02, t1 t1a03, t1 t1a04, t1 t1a05,
-                  t1 t1a06, t1 t1a07, t1 t1a08, t1 t1a09, t1 t1a10
-                  ,t1 t1a11, t1 t1a12, t1 t1a13, t1 t1a14, t1 t1a15
-                  ,t1 t1a16, t1 t1a17, t1 t1a18, t1 t1a19, t1 t1a20
+                  fjs_tab1 t1a01, fjs_tab1 t1a02, fjs_tab1 t1a03, fjs_tab1 t1a04, fjs_tab1 t1a05,
+                  fjs_tab1 t1a06, fjs_tab1 t1a07, fjs_tab1 t1a08, fjs_tab1 t1a09, fjs_tab1 t1a10
+                  ,fjs_tab1 t1a11, fjs_tab1 t1a12, fjs_tab1 t1a13, fjs_tab1 t1a14, fjs_tab1 t1a15
+                  ,fjs_tab1 t1a16, fjs_tab1 t1a17, fjs_tab1 t1a18, fjs_tab1 t1a19, fjs_tab1 t1a20
 
 --options sql interrupt off
 
@@ -236,7 +236,7 @@ END FUNCTION
 FUNCTION get_max_k() RETURNS BIGINT
     DEFINE m BIGINT
     WHENEVER ERROR CONTINUE
-    SELECT MAX(k) INTO m FROM t1
+    SELECT MAX(k) INTO m FROM fjs_tab1
     WHENEVER ERROR STOP
     RETURN NVL(m,0)
 END FUNCTION
