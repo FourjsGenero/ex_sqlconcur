@@ -132,7 +132,7 @@ MAIN
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
                 DELETE FROM fjs_tab1 WHERE k = rec.k
-                CALL add_log("delete from fjs_tab1 where k=1", sqlca.sqlcode, NULL)
+                CALL add_log(sfmt("delete from fjs_tab1 where k=%1",rec.k), sqlca.sqlcode, NULL)
             END IF
 
         ON ACTION force_sql_error
