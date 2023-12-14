@@ -4,6 +4,8 @@
 
 This Genero BDL demo can be used to test SQL commands with two concurrent
 programs accessing the same database table rows.
+With this sample you can better learn the behavior of an SQL database engine
+when concurrent clients modify the same rows.
 
 ![Genero program launcher (GDC)](https://github.com/FourjsGenero/ex_sqlconcur/raw/master/docs/sqlconcur-screen-001.png)
 
