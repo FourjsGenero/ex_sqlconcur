@@ -211,10 +211,7 @@ MAIN
 
 END MAIN
 
-FUNCTION add_log(msg, sta, val)
-    DEFINE
-        msg STRING,
-        sta, val INTEGER
+FUNCTION add_log(msg STRING, sta INTEGER, val INTEGER) RETURNS ()
     DEFINE x INTEGER
     DEFINE d ui.Dialog
     LET x = mlog.getLength() + 1
