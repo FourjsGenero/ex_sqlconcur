@@ -22,7 +22,6 @@ MAIN
 
     --DISPLAY "ADD YOUR DATABASE CONNECTION HERE..." EXIT PROGRAM 1
     DATABASE test1
-    --CONNECT TO "test1toro+driver='dbmora'" USER "orauser" USING "fourjs"
 
     --SET LOCK MODE TO WAIT 60
     --UPDATE pg_settings SET setting = 5000 WHERE name = 'lock_timeout'
@@ -49,11 +48,36 @@ MAIN
             DROP TABLE fjs_tab1
             CALL add_log("drop table fjs_tab1", sqlca.sqlcode, 0)
 
+        ON ACTION set_isolation
+            LET int_flag = FALSE
+            PROMPT "IFX isolation level (0:DR|1:CR|2:CRLC|3:CS|4:RR):" FOR x
+            CALL ui.Interface.refresh()
+            IF NOT int_flag THEN
+                CASE x
+                WHEN 0
+                  SET ISOLATION TO DIRTY READ
+                  CALL add_log("set isolation to dirty read", sqlca.sqlcode, NULL)
+                WHEN 1
+                  SET ISOLATION TO COMMITTED READ
+                  CALL add_log("set isolation to committed read", sqlca.sqlcode, NULL)
+                WHEN 2
+                  SET ISOLATION TO COMMITTED READ LAST COMMITTED
+                  CALL add_log("set isolation to committed read last committed", sqlca.sqlcode, NULL)
+                WHEN 3
+                  SET ISOLATION TO CURSOR STABILITY
+                  CALL add_log("set isolation to cursor stability", sqlca.sqlcode, NULL)
+                WHEN 4
+                  SET ISOLATION TO REPEATABLE READ
+                  CALL add_log("set isolation to repeatable read", sqlca.sqlcode, NULL)
+                END CASE
+            END IF
+
         ON ACTION set_lock_wait
             LET int_flag = FALSE
-            PROMPT "Enter lock wait seconds (<0 = not wait, 0 = wait inf):"
-                FOR x
-            CASE
+            PROMPT "Enter lock wait seconds (<0 = not wait, 0 = wait inf):" FOR x
+            CALL ui.Interface.refresh()
+            IF NOT int_flag THEN
+                CASE
                 WHEN x < 0
                     SET LOCK MODE TO NOT WAIT
                     CALL add_log(
@@ -65,9 +89,19 @@ MAIN
                     SET LOCK MODE TO WAIT x
                     CALL add_log(
                         SFMT("lock mode set to %1", x), sqlca.sqlcode, NULL)
-            END CASE
+                END CASE
+            END IF
 
-        ON ACTION select_from
+        ON ACTION select_row
+            LET int_flag = FALSE
+            PROMPT "Enter key of the row to select:" FOR rec.k
+            CALL ui.Interface.refresh()
+            IF NOT int_flag THEN
+               SELECT name INTO rec.c FROM fjs_tab1 WHERE k = rec.k
+               CALL add_log("select name from fjs_tab1", sqlca.sqlcode, rec.c)
+            END IF
+
+        ON ACTION select_count
             SELECT COUNT(*) INTO x FROM fjs_tab1
             CALL add_log("select count(*) from fjs_tab1", sqlca.sqlcode, x)
 
@@ -158,8 +192,7 @@ MAIN
             CALL add_log("declare for udpate cursor", sqlca.sqlcode, NULL)
         ON ACTION forupd_open -- must be in TX
             LET int_flag = FALSE
-            PROMPT "Enter key of the row to select for update (0 for all):"
-                FOR rec.k
+            PROMPT "Enter key of the row to select (0 for all):" FOR rec.k
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
                 OPEN c_fu USING rec.k, rec.k
