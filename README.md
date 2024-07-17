@@ -11,10 +11,7 @@ when concurrent clients modify the same rows.
 
 ## Prerequisites
 
-* Genero BDL 3.20+
-* Genero Browser Client 1.00.52+
-* Genero Desktop Client 3.20+
-* Genero Studio 3.20+
+* Latest Genero version
 * GNU Make
 
 ## Setup the test program
