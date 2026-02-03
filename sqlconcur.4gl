@@ -98,12 +98,12 @@ MAIN
             CALL ui.Interface.refresh()
             IF NOT int_flag THEN
                SELECT name INTO rec.c FROM fjs_tab1 WHERE k = rec.k
-               CALL add_log("select name from fjs_tab1", sqlca.sqlcode, rec.c)
+               CALL add_log(SFMT("select name from fjs_tab1: name = %1", rec.c), sqlca.sqlcode, rec.c)
             END IF
 
         ON ACTION select_count
             SELECT COUNT(*) INTO x FROM fjs_tab1
-            CALL add_log("select count(*) from fjs_tab1", sqlca.sqlcode, x)
+            CALL add_log(SFMT("select count(*) from fjs_tab1: %1", x), sqlca.sqlcode, x)
 
         ON ACTION begin_work
             BEGIN WORK
